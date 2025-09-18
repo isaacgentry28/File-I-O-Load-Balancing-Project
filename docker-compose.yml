@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  server1:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: fio_server_1
+    volumes:
+      - ./repo_data:/app/repo_data
+      - ./server_config.json:/app/server_config.json:ro
+    networks:
+      - fio_net
+
+  server2:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: fio_server_2
+    volumes:
+      - ./repo_data:/app/repo_data
+      - ./server_config.json:/app/server_config.json:ro
+    networks:
+      - fio_net
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: fio_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - server1
+      - server2
+    networks:
+      - fio_net
+
+networks:
+  fio_net:
+    driver: bridge
