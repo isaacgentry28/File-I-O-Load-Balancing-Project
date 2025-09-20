@@ -23,6 +23,17 @@ services:
     networks:
       - fio_net
 
+  server3:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: fio_server_3
+    volumes:
+      - ./repo_data:/app/repo_data
+      - ./server_config.json:/app/server_config.json:ro
+    networks:
+      - fio_net
+
   nginx:
     image: nginx:stable-alpine
     container_name: fio_nginx
