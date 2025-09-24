@@ -83,6 +83,13 @@ async def write_file(path: str, file: UploadFile = File(...), x_api_key: Optiona
         save_meta(path, meta)
         return info
 
+@app.get("/files/{path:path}/versions", response_model=List[VersionInfo])
+async def list_versions(path: str, x_api_key: Optional[str] = Header(None)):
+    require_key(x_api_key)
+    meta = load_meta(path)
+    return meta["versions"]
+
+
 @app.get("/files/{path:path}")
 async def read_file(path: str, version: Optional[int] = None, x_api_key: Optional[str] = Header(None)):
     require_key(x_api_key)
@@ -94,12 +101,6 @@ async def read_file(path: str, version: Optional[int] = None, x_api_key: Optiona
     if not p.exists():
         raise HTTPException(404, "version not found")
     return FileResponse(p)
-
-@app.get("/files/{path:path}/versions", response_model=List[VersionInfo])
-async def list_versions(path: str, x_api_key: Optional[str] = Header(None)):
-    require_key(x_api_key)
-    meta = load_meta(path)
-    return meta["versions"]
 
 @app.delete("/files/{path:path}")
 async def delete_latest(path: str, x_api_key: Optional[str] = Header(None)):
