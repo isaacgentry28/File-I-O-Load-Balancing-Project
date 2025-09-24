@@ -76,12 +76,13 @@ async def write_file(path: str, file: UploadFile = File(...), x_api_key: Optiona
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
 
-        checksum = "sha256:" + sha256(data).hexdigest()
-        info = VersionInfo(version=new_v, size=len(data), checksum=checksum, timestamp=datetime.utcnow().isoformat()+"Z")
-        meta["latest"] = new_v
-        meta["versions"].append(info.dict())
-        save_meta(path, meta)
-        return info
+    checksum = "sha256:" + sha256(data).hexdigest()
+    info = VersionInfo(version=new_v, size=len(data), checksum=checksum, timestamp=datetime.utcnow().isoformat()+"Z")
+    meta["latest"] = new_v
+    # use model_dump() (Pydantic v2) instead of the deprecated dict()
+    meta["versions"].append(info.model_dump())
+    save_meta(path, meta)
+    return info
 
 @app.get("/files/{path:path}/versions", response_model=List[VersionInfo])
 async def list_versions(path: str, x_api_key: Optional[str] = Header(None)):
